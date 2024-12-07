@@ -22,18 +22,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y python3-pip libffi-dev libssl-dev git
+        sudo apt install -y python3-pip libffi-dev libssl-dev git zlib1g-dev libc6-dev openjdk-11-jdk
         pip install buildozer
-
-    - name: Setup Android SDK
-      run: |
-        sudo apt install -y openjdk-11-jdk
-        export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-
-    - name: Install Buildozer Android dependencies
-      run: |
-        sudo apt install -y zlib1g-dev libc6-dev
-        buildozer android sdk
 
     - name: Build APK
       run: |
