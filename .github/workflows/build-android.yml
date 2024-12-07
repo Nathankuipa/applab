@@ -1,30 +1,47 @@
 name: Build APK
-on: [push]
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual triggers
+
 jobs:
-  build-android:
-    name: Build for Android
+  build-apk:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Buildozer dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y git zip unzip python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev automake
-          pip install --user --upgrade Cython virtualenv
-          pip install --user --upgrade buildozer
-          echo 'export PATH=$PATH:~/.local/bin/' >> ~/.bashrc
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
 
-      - name: Handle Java path
-        run: |
-          export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
-          sudo update-java-alternatives --set ${JAVA_HOME}
-          export PATH=$JAVA_HOME/bin:$PATH
-          yes | buildozer -v android debug
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip libffi-dev libssl-dev git
+        pip install buildozer
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: package
-          path: bin/*.apk 
+    - name: Setup Android SDK
+      run: |
+        sudo apt install -y openjdk-11-jdk
+        export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+    - name: Install Buildozer Android dependencies
+      run: |
+        sudo apt install -y zlib1g-dev libc6-dev
+        buildozer android sdk
+
+    - name: Build APK
+      run: |
+        buildozer init  # Only if buildozer.spec doesn't exist
+        buildozer -v android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug.apk
+        path: bin/*.apk
