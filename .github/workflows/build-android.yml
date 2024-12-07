@@ -27,7 +27,7 @@ jobs:
 
     - name: Build APK
       run: |
-        buildozer init  # Only if buildozer.spec doesn't exist
+        #buildozer init  # Only if
         buildozer -v android debug
 
     - name: Upload APK
